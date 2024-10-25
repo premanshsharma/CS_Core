@@ -106,7 +106,8 @@ and work on the data members of the class.
 but if it's defined outside the class, then we have to use the scope resolution :: operator
 along with the class name and with function name.
 - Example:-
-```class class_name
+```
+class class_name
       {
           public:
           int variable_1;
@@ -144,7 +145,8 @@ class needs access to the internal details of a class.
 - It can be a regular function or a member function of another class.
 - It breaks encapsulation to some extent but is useful when tight collaboration between two classes
 or functions is needed.
-```class MyClass {
+```
+class MyClass {
 private:
     int value;
 
@@ -160,7 +162,178 @@ void showValue(const MyClass& obj) {
     std::cout << "Value: " << obj.value << std::endl;  // Can access private members
 }
 ```
-### Difference between structure and class
+### 1.4 Constructor
+- The name of the constructor is the same as its class name.
+- Constructors are mostly declared in the public section of the class though they can be declared in the private section of the class.
+- Constructors do not return values; hence they do not have a return type.
+- A constructor gets called automatically when we create the object of the class.
+#### 1.4.1 Types of Constructors Definition
+##### 1.4.1.1 Defining the Constructor Within the Class
+```
+<class-name> (list-of-parameters) {
+     // constructor definition
+}
+```
+##### 1.4.1.2 Defining the Constructor Outside the Class
+```
+<class-name> {
+
+    // Declaring the constructor
+    // Definiton will be provided outside
+    <class-name>();
+
+    // Defining remaining class
+}
+
+<class-name>: :<class-name>(list-of-parameters) {
+      // constructor definition 
+}
+```
+#### 1.4.2 Types of Constructors
+##### 1.4.2.1 Default Constructors
+- A constructor that takes no parameters (or has all parameters with default values).
+- Initializes objects with default values.
+```
+class MyClass {
+public:
+    MyClass() { // Default constructor
+        // Initialization code
+    }
+};
+```
+##### 1.4.2.2 Parameterized Constructors
+- A constructor that takes parameters to initialize an object with specific values.
+- Allows customization of object creation.
+```
+class MyClass {
+public:
+    int value;
+    MyClass(int v) { // Parameterized constructor
+        value = v;
+    }
+};
+```
+##### 1.4.2.3 Copy Constructors
+- A constructor that creates a new object as a copy of an existing object.
+- Used to initialize one object with another object of the same class.
+```
+class MyClass {
+public:
+    int value;
+    MyClass(const MyClass &obj) { // Copy constructor
+        value = obj.value;
+    }
+};
+```
+- **Deep Copy vs Shallow Copy**
+  - Shallow Copy
+    - Creates a new object but does not create copies of the objects that the original object references. Instead, it copies the references (pointers) to those objects.
+    - Both the original and the copied object share the same memory for the referenced objects.
+    - If one object modifies the shared data, it affects the other object as well.
+  - Deep Copy
+    - Creates a new object and also creates copies of all objects referenced by the original object. Each object has a separate copy of the data.
+    - Modifications to the copied object do not affect the original object.
+- **Copy Constructor vs Assignment Operator**
+  - Copy Constructor
+    - Initializes a new object using an existing object of the same class.
+    - Called when a new object is created as a copy of an existing object
+      (e.g., when passing by value).
+  -  Assignment Operator:-
+    -  Used to copy the contents of one existing object to another existing object of the same class.
+    - Called when using the assignment operator (=) to assign one object to another.
+ 
+##### 1.4.2.4 Virtual Constructors
+In C++, the constructor cannot be virtual, because when a constructor of a class is executed there is no virtual table in the memory, which means no virtual pointer defined yet. So, the constructor should always be non-virtual.
+
+#### 1.4.3 Constructor Overloading
+- Constructor overloading is a feature in C++ (and other object-oriented programming languages) that allows a class to have more than one constructor with different parameter lists. This enables the creation of objects in various ways, providing flexibility in how objects are initialized.
+- Each constructor must have a different signature (i.e., a different number of parameters or different types of parameters).
+- This allows the same class to be initialized with different sets of data.
+
+### 1.5 Destructor
+- A destructor is also a special member function like a constructor. Destructor destroys the class objects created by the constructor. 
+- Destructor has the same name as their class name preceded by a tilde (~) symbol.
+- It is not possible to define more than one destructor.
+- The destructor is only one way to destroy the object created by the constructor. Hence, the destructor cannot be overloaded.
+- It cannot be declared static or const.
+- Destructor neither requires any argument nor returns any value.
+- It is automatically called when an object goes out of scope. 
+- Destructor releases memory space occupied by the objects created by the constructor.
+- In destructor, objects are destroyed in the reverse of an object creation.
+- **How to call destructors explicitly?** ```object_name.~class_name()```
+- **When do we need to write a user-defined destructor?**
+  - Default Destructor: The compiler provides a default destructor that works for simple cases.
+  - Dynamic Memory: If the class has pointers to dynamically allocated memory, you need to write your destructor to release that memory.
+  - Avoid Memory Leaks: Custom destructors prevent memory leaks by ensuring that all allocated resources are properly freed when the object is destroyed.
+ 
+#### 1.5.1 Private Destructor
+Whenever we want to control the destruction of objects of a class, we make the destructor private. For dynamically created objects, you may pass a pointer to the object to a function and the function deletes the object. If the object is referred after the function call, the reference will become dangling.
+#### 1.5.2 Virtual Destructor
+- Definition: A virtual destructor is declared with the virtual keyword in a base class. It allows derived classes to override the destructor while ensuring that the correct destructor is called when an object is deleted through a base class pointer.
+- Purpose: The primary purpose of a virtual destructor is to ensure that the destructor of the derived class is called when an object is deleted, even if it is referenced by a base class pointer. This prevents resource leaks and ensures proper cleanup.
+- Usage: Always declare the destructor of a base class as virtual when using polymorphism.
+```
+class Base {
+public:
+    virtual ~Base() { // Virtual destructor
+        // Cleanup for Base
+    }
+};
+
+class Derived : public Base {
+public:
+    ~Derived() override { // Overrides Base destructor
+        // Cleanup for Derived
+    }
+};
+
+int main() {
+    Base* obj = new Derived();
+    delete obj; // Calls Derived destructor first, then Base destructor
+    return 0;
+}
+```
+#### 1.5.3 Pure Virtual Destructor
+- Definition: A pure virtual destructor is a virtual destructor that is declared with = 0 in the base class. It makes the base class abstract, meaning it cannot be instantiated directly.
+- Purpose: It allows derived classes to provide their own implementation of the destructor while ensuring that the base class cannot be instantiated. This is useful when you want to define a common interface for all derived classes but do not want to allow the direct creation of base class objects.
+- Implementation: Even though the destructor is pure virtual, you can still define for it outside the class, which is necessary for cleanup in derived classes.
+```
+class AbstractBase {
+public:
+    virtual ~AbstractBase() = 0; // Pure virtual destructor
+};
+
+AbstractBase::~AbstractBase() {
+    // Optional: Cleanup for AbstractBase
+}
+
+class ConcreteDerived : public AbstractBase {
+public:
+    ~ConcreteDerived() override {
+        // Cleanup for ConcreteDerived
+    }
+};
+
+int main() {
+    AbstractBase* obj = new ConcreteDerived();
+    delete obj; // Calls ConcreteDerived destructor first
+    return 0;
+}
+```
+- **Differences Between Destructors and Normal Member Functions:**
+  - Purpose: Destructors clean up resources when an object is destroyed, while normal member functions perform regular operations on the object.
+  - Naming: Destructors are named with a tilde (~) followed by the class name (e.g., ~MyClass()), whereas normal member functions can have any valid name.
+  - Invocation: Destructors are called automatically when an object goes out of scope or is deleted; normal member functions are called explicitly by the programmer.
+  - Return Type: Destructors do not have a return type; normal member functions can have any return type.
+- **Can There Be More Than One Destructor in a Class?**
+  - No, a class can only have one destructor.
+- **When Do We Need to Write a User-Defined Destructor?**
+  - You need to write a user-defined destructor when your class manages resources that require explicit cleanup, such as dynamically allocated memory or file handles, to prevent memory leaks.
+- **Can a Destructor Be Virtual? When to Use It?**
+  - Yes, a destructor can be virtual. You should use a virtual destructor when you have a base class that will be inherited, ensuring the derived class's destructor is called correctly when an object is deleted through a base class pointer, preventing resource leaks.
+
+### Questions
+1. **Difference between structure and class**
 - The most important of them is hiding implementation details.
 - A structure will by default not hide its implementation details from whoever uses it in code,
 while a class by default hides all its implementation details and will therefore by default
